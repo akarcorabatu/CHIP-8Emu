@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-
+#include <stdbool.h>
 #define FONT_START_ADDRESS 0x50
 
 typedef struct Chip8
@@ -15,6 +15,7 @@ typedef struct Chip8
     uint8_t sound_timer;
     uint8_t v_registers[16]; // From V0 to VF.
     uint8_t keys[16];
+    bool pressFlag;
 } Chip8;
 
 void chip8Init(Chip8* chip8);

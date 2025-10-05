@@ -110,16 +110,19 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
 
                 case 0x0001:
                     c->v_registers[x] = c->v_registers[x] | c->v_registers[y];
+                    c->v_registers[0xF] = 0;
                     c->pc+=2;
                     break;
 
                 case 0x0002:
                     c->v_registers[x] = c->v_registers[x] & c->v_registers[y];
+                    c->v_registers[0xF] = 0;
                     c->pc+=2;
                     break;
 
                 case 0x0003:
                     c->v_registers[x] = c->v_registers[x] ^ c->v_registers[y];
+                    c->v_registers[0xF] = 0;
                     c->pc+=2;
                     break;
 
@@ -201,14 +204,17 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
                     uint8_t current = (spriteData & (0x80 >> j)) ? 1 : 0;
                     if(current == 1)
                     {
-                        int xpos = (xPos + j) % 64;
-                        int ypos = (yPos + i) % 32;
+                        int xpos = (xPos + j);
+                        if(xpos >= 64){break;}
+                        int ypos = (yPos + i);
+                        if(ypos >= 32){break;}  
 
                         if(c->display[ypos][xpos] == 1) c->v_registers[0xF] = 1;
 
                         c->display[ypos][xpos] ^= 1;
+                        
                     }
-
+                    
                 }
             }
             c->pc += 2;
@@ -237,9 +243,23 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
                 break;
 
             case 0x000A:
+            uint8_t keyPressed;
                 for (uint8_t i = 0; i < 16; i++)
                 {
-                    if(c->keys[i] == 1) {c->v_registers[x] = i; c->pc+=2;}
+                    if(c->keys[i] == 1) 
+                    {
+                        c->v_registers[x] = i; 
+                        keyPressed = i;
+                        c->pressFlag = 1;
+                        printf("Pressed.");
+                    }
+                }
+
+                if(c->keys[keyPressed] == 0 && c->pressFlag == 1) 
+                {
+                    c->pc+=2; 
+                    c->pressFlag = 0;
+                    printf("Released.");
                 }
                 break;
             
@@ -439,7 +459,7 @@ int main(int argc, char *argv[])
         } 
         float start = SDL_GetTicks(); 
         uint16_t opcode = (chip8.memory[chip8.pc] << 8) | chip8.memory[chip8.pc + 1]; // Fetch instruction from memory. 
-        decodeExec(opcode, &chip8, 0, 0, 0); 
+        decodeExec(opcode, &chip8, 0, 0, 1); 
         if (chip8.sound_timer > 0) {audio_data.sound_timer = chip8.sound_timer;} 
         else {audio_data.sound_timer = 0;} 
         

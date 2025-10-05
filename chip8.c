@@ -18,6 +18,7 @@ void chip8Init(Chip8* chip8)
     chip8->delay_timer = 0;
     chip8->sound_timer = 0;
     chip8->sp = -1;
+    chip8->pressFlag = false;
 
 
     chip8->pc = 0x200;

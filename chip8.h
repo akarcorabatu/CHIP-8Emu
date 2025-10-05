@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
+
 #define FONT_START_ADDRESS 0x50
 
 typedef struct Chip8

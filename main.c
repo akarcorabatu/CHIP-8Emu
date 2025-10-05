@@ -5,6 +5,8 @@
 #include <time.h>
 #include <math.h>
 
+
+// SDL Beep sound configurations and callback function.
 #define SAMPLE_RATE 44100
 #define TONE_FREQ 440
 #define AMPLITUDE 28000
@@ -36,6 +38,10 @@ void audio_callback(void* userdata, Uint8* stream, int len)
     }
 }
 
+// Decodes and executes the OpCode.
+// conf1 == 0 if you want to do c.v_registers[x] = c.v_registers[y] operation before shifting.
+// conf2 == 0 if you want to jump to V0 + NNN, conf2 == 1 if you want to jump to VX + NNN
+// conf3 == 0 if you do not want to increment the index register when doing store and load operations.
 void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t conf3)
 {
     uint8_t x = (opcode & 0x0F00) >> 8;
@@ -133,7 +139,7 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
                     c->pc+=2;
                     break;
 
-                case 0x005:
+                case 0x0005:
                     uint8_t subtrahend = c->v_registers[x];
                     c->v_registers[x] = c->v_registers[x] - c->v_registers[y];
                     if(subtrahend >= c->v_registers[y]){c->v_registers[0xF] = 1;}
@@ -141,26 +147,26 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
                     c->pc+=2;
                     break;
 
-                case 0x006:
+                case 0x0006:
                     if(conf1 == 0){c->v_registers[x] = c->v_registers[y];}
                     uint8_t lsb = c->v_registers[x] & 0x01;
                     c->v_registers[x] = c->v_registers[x] >> 1;
-                    c->v_registers[0xF] = lsb;
+                    c->v_registers[0xF] = lsb ? 1 : 0;
                     c->pc+=2;
                     break;
 
-                case 0x007:
+                case 0x0007:
                     c->v_registers[x] = c->v_registers[y] - c->v_registers[x];
                     if(c->v_registers[y] >= c->v_registers[x]){c->v_registers[0xF] = 1;}
                     else{c->v_registers[0xF] = 0;}
                     c->pc+=2;
                     break;
                 
-                case 0x00E:
+                case 0x000E:
                     if(conf1 == 0){c->v_registers[x] = c->v_registers[y];}
                     uint8_t msb = c->v_registers[x] & 0x80;
                     c->v_registers[x] = c->v_registers[x] << 1;
-                    c->v_registers[0xF] = msb >> 7;
+                    c->v_registers[0xF] = msb ? 1 : 0;
                     c->pc+=2;
                     break;
             }
@@ -251,7 +257,6 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
                         c->v_registers[x] = i; 
                         keyPressed = i;
                         c->pressFlag = 1;
-                        printf("Pressed.");
                     }
                 }
 
@@ -259,7 +264,6 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
                 {
                     c->pc+=2; 
                     c->pressFlag = 0;
-                    printf("Released.");
                 }
                 break;
             
@@ -314,6 +318,7 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
     }
 }
 
+// Draws the chip8.display[32][64] on the screen using SDL.
 void drawDisplay(Chip8* c, SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 {
     uint32_t pixels[64 * 32];
@@ -334,6 +339,7 @@ void drawDisplay(Chip8* c, SDL_Window* window, SDL_Renderer* renderer, SDL_Textu
 
 int main(int argc, char *argv[])
 {
+    // Arguments to run the emulator with a selected file.
     if(argc != 2)
     {
         if(argc > 2)
@@ -350,6 +356,7 @@ int main(int argc, char *argv[])
     srand(time(NULL));
 
     bool running = true;
+    // Creating the window with SDL.
     SDL_Event event;
 
     SDL_Window* window = NULL;
@@ -390,7 +397,7 @@ int main(int argc, char *argv[])
         SDL_TEXTUREACCESS_STREAMING,
         64,32);
 
-
+    // SDL Beep sound configuration.
     SDL_AudioSpec want, have;
     AudioData audio_data = {0, 0};
 
@@ -430,17 +437,21 @@ int main(int argc, char *argv[])
     };
 
 
-    float opPerSecond = 1000; 
-    float msPerOp = 1000 / opPerSecond; 
-    float decrementPerSecond = 60; 
-    float msPerDecrement = 1000/decrementPerSecond; 
+    float opPerSecond = 700; // 700 instructions per second.
+    float msPerOp = 1000.0f / opPerSecond;
+
+    float decrementPerSecond = 60.0f; // Decrement /delay and sound timers by one 60 times per second.
+    float msPerDecrement = 1000.0f / decrementPerSecond; 
     uint32_t decrementTimer = SDL_GetTicks(); 
+
     while(running) 
     { 
         while(SDL_PollEvent(&event)) 
         { 
             if(event.type == SDL_QUIT) {running = false;} 
             else if(event.type == SDL_KEYDOWN){if(event.key.keysym.sym == SDLK_ESCAPE) {running = false;}} 
+
+            // Input
             if (event.type == SDL_KEYDOWN) 
             { 
                 for (int i = 0; i < 16; i++) 
@@ -458,9 +469,11 @@ int main(int argc, char *argv[])
             } 
         } 
         float start = SDL_GetTicks(); 
+        
         uint16_t opcode = (chip8.memory[chip8.pc] << 8) | chip8.memory[chip8.pc + 1]; // Fetch instruction from memory. 
-        decodeExec(opcode, &chip8, 0, 0, 1); 
-        if (chip8.sound_timer > 0) {audio_data.sound_timer = chip8.sound_timer;} 
+        decodeExec(opcode, &chip8, 0, 0, 1); // Decode and execute.
+
+        if (chip8.sound_timer > 0) {audio_data.sound_timer = chip8.sound_timer;} // Beep if sound timer is greater than > 0.
         else {audio_data.sound_timer = 0;} 
         
         if(SDL_GetTicks() - decrementTimer >= msPerDecrement)

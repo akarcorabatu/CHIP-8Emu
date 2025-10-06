@@ -25,22 +25,10 @@ cmake ..
 make
 ```
 
-## Windows
-```
-mkdir build
-cd build
-cmake -G "MinGW Makefiles" -DSDL2_DIR="<your SDL2 path>" ..
-mingw32-make
-```
-
 # Running
 ## Linux
 ```
 ./chip8emu <ROM path>
-```
-## Windows
-```
-chip8emu.exe <ROM path>
 ```
 
 # License

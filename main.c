@@ -469,7 +469,7 @@ int main(int argc, char *argv[])
         } 
         
         uint16_t opcode = (chip8.memory[chip8.pc] << 8) | chip8.memory[chip8.pc + 1]; // Fetch instruction from memory. 
-        decodeExec(opcode, &chip8, 0, 0, 1); // Decode and execute.
+        decodeExec(opcode, &chip8, 1, 0, 1); // Decode and execute.
 
         if (chip8.sound_timer > 0) {audio_data.sound_timer = chip8.sound_timer;} // Beep if sound timer is greater than > 0.
         else {audio_data.sound_timer = 0;} 

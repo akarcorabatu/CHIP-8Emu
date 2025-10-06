@@ -3,7 +3,7 @@ A CHIP-8 Emulator Written in C
 
 I have written this CHIP-8 emulator to see how a processor's specifications are translated into actual code. This is my first time writing an emulator.
 
-# CHIP-8
+## CHIP-8
 CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker on his 1802 microprocessor. It was initially used on the COSMAC VIP and Telmac 1800, which were 8-bit microcomputers made in the mid-1970s. It is a bytecode language, allowing games to be written once and run on any machine with a CHIP-8 interpreter. This made it possible for programmers to write games without needing to know assembly language of a specific chip.
 
 ## Screenshots
@@ -12,11 +12,11 @@ CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker on
 
 ![CHIP-8 Rush Hour](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/rush_hour_2.png)
 
-## Tetris
+### Tetris
 ![CHIP-8 Tetris](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/tetris.png)
 
-# Compiling
-## Linux
+## Compiling
+### Linux
 ```
 sudo apt install build-essential cmake libsdl2-dev
 mkdir build
@@ -25,12 +25,12 @@ cmake ..
 make
 ```
 
-# Running
-## Linux
+## Running
+### Linux
 ```
 ./chip8emu <ROM path>
 ```
 
-# License
+## License
 This project is licensed under the MIT License. See the LICENSE file for full license text. 
 © 2025 Akar Çorabatu

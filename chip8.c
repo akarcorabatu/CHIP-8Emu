@@ -4,7 +4,6 @@
 #include <string.h>
 
 
-
 void chip8Init(Chip8* chip8)
 {
     memset(chip8->memory, 0, sizeof(chip8->memory));
@@ -21,7 +20,7 @@ void chip8Init(Chip8* chip8)
     chip8->pressFlag = false;
 
 
-    chip8->pc = 0x200;
+    chip8->pc = ROM_START_ADDRESS; // ROM start address.
     uint8_t fontSet[80] = 
     {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -80,7 +79,7 @@ void loadROM(Chip8* c, char* romName)
     int i = 0;
     while(fread(&byte, 1, 1, file) == 1)
     {
-        c->memory[0x200 + i] = byte;
+        c->memory[ROM_START_ADDRESS + i] = byte;
         i++;
     }
 

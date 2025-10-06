@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #define FONT_START_ADDRESS 0x50
-
+#define ROM_START_ADDRESS 0x200
 typedef struct Chip8
 {
     uint8_t memory[4096];

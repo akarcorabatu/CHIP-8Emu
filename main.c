@@ -327,7 +327,7 @@ void drawDisplay(Chip8* c, SDL_Window* window, SDL_Renderer* renderer, SDL_Textu
     {
         for (int x = 0; x < 64; x++)
         {
-            pixels[y * 64 + x] = c->display[y][x] ? 0xFFFFFFFF : 0x000000FF;
+            pixels[y * 64 + x] = c->display[y][x] ? 0x42B0F5FF : 0x000000FF;
         }
     }
 
@@ -436,20 +436,19 @@ int main(int argc, char *argv[])
         SDLK_v     // F
     };
 
+    uint32_t msPerOp = 1;
 
-    float opPerSecond = 700; // 700 instructions per second.
-    float msPerOp = 1000.0f / opPerSecond;
-
-    float decrementPerSecond = 60.0f; // Decrement /delay and sound timers by one 60 times per second.
-    float msPerDecrement = 1000.0f / decrementPerSecond; 
+    uint32_t msPerDecrement = 16;
     uint32_t decrementTimer = SDL_GetTicks(); 
 
     while(running) 
     { 
+        uint32_t start = SDL_GetTicks(); 
+
         while(SDL_PollEvent(&event)) 
         { 
             if(event.type == SDL_QUIT) {running = false;} 
-            else if(event.type == SDL_KEYDOWN){if(event.key.keysym.sym == SDLK_ESCAPE) {running = false;}} 
+            else if(event.type == SDL_KEYDOWN){if(event.key.keysym.sym == SDLK_l) {running = false;}} 
 
             // Input
             if (event.type == SDL_KEYDOWN) 
@@ -468,7 +467,6 @@ int main(int argc, char *argv[])
                 } 
             } 
         } 
-        float start = SDL_GetTicks(); 
         
         uint16_t opcode = (chip8.memory[chip8.pc] << 8) | chip8.memory[chip8.pc + 1]; // Fetch instruction from memory. 
         decodeExec(opcode, &chip8, 0, 0, 1); // Decode and execute.
@@ -478,13 +476,14 @@ int main(int argc, char *argv[])
         
         if(SDL_GetTicks() - decrementTimer >= msPerDecrement)
         { 
-            drawDisplay(&chip8, window, renderer, texture); 
             if(chip8.delay_timer > 0) chip8.delay_timer--; 
-            if(chip8.sound_timer > 0) chip8.sound_timer--; decrementTimer = SDL_GetTicks(); 
+            if(chip8.sound_timer > 0) chip8.sound_timer--; 
+            decrementTimer = SDL_GetTicks(); 
+            drawDisplay(&chip8, window, renderer, texture);
         } 
         
-        float elapsed = SDL_GetTicks() - start; 
-        if(elapsed < msPerOp){SDL_Delay((float)(msPerOp - elapsed));} 
+        uint32_t elapsed = SDL_GetTicks() - start; 
+        if(elapsed < msPerOp){SDL_Delay(msPerOp - elapsed);} 
     }
     return 0;
 }

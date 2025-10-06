@@ -31,6 +31,25 @@ make
 ./chip8emu <ROM path>
 ```
 
+## Keyboard Controls
+**Original CHIP-8 Keypad Layout**
+<table>
+<tr><td>1</td><td>2</td><td>3</td><td>C</td></tr>
+<tr><td>4</td><td>5</td><td>6</td><td>D</td></tr>
+<tr><td>7</td><td>8</td><td>9</td><td>E</td></tr>
+<tr><td>A</td><td>0</td><td>B</td><td>F</td></tr>
+</table>
+
+**Emulator Keypad Layout**
+<table>
+<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+<tr><td>Q</td><td>W</td><td>E</td><td>R</td></tr>
+<tr><td>A</td><td>S</td><td>D</td><td>F</td></tr>
+<tr><td>Z</td><td>X</td><td>C</td><td>V</td></tr>
+</table>
+
+
 ## License
 This project is licensed under the MIT License. See the LICENSE file for full license text. 
+
 © 2025 Akar Çorabatu

@@ -220,11 +220,12 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t* waitingForVBlank, uint8_t co
                             if(c->display[ypos][xpos] == 1) c->v_registers[0xF] = 1;
 
                             c->display[ypos][xpos] ^= 1;
-                            *waitingForVBlank = 0;
+                            
                         }
                     }
                 }
                 c->pc += 2;
+                *waitingForVBlank = 0;
             }
             break;
 

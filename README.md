@@ -38,10 +38,10 @@ The display is updated every ≈16ms. The emulator uses SDL2 to render the displ
 
 **Clipping Quirk:** Instruction `DXYN` clips the sprite instead of wrapping around. You can change this behavior easily by modifying this instruction's implementation in the code.
 
-**Jumping Quirk:** Instruction `BNNN` jumps to the address "value of `v0 register` + NNN" by default. You can change this behavior to make this instruction jump to "value of `vX register` + NNN" by setting `uint8_t conf2 = 0;` line to `uint8_t conf2 = 1;`. You can find this line at the start of the main function.
-
 **Shift Quirk:** Instructions `8XY6` and `8XYE` ignore `vY register` and shift `vX register` by default. However, some games require loading `vY register` to `vX register` before making shifting a operation on `vX register`. You can use `-s` parameter to run games that needs this behavior. (e.g. Space Invaders needs this modification to run properly.)
 e.g. `$ ./chip8emu -s <ROM path>` 
+
+**Jumping Quirk:** Instruction `BNNN` jumps to the address "value of `v0 register` + NNN" by default. You can change this behavior to make this instruction jump to "value of `vX register` + NNN" by setting `uint8_t conf2 = 0;` line to `uint8_t conf2 = 1;`. You can find this line at the start of the main function.
 
 
 ## Screenshots

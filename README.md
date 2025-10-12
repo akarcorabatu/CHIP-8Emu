@@ -32,7 +32,7 @@ The display is updated every ≈16ms. The emulator uses SDL2 to render the displ
 ### Quirks
 **VF Reset Quirk:** Instructions `8XY1`, `8XY2` and `8XY3` set  `vF register` to 0 after performing their logical operations.
 
-**Load Store (Memory) Quirk:** Instructions `FX55` and `FX65` increment the index register by default. You can prevent this behavior by setting `uint8_t conf3 = 1;` line to `uint8_t conf3 = 0;`. You can find this line at the start of the main function.
+**Load Store (Memory) Quirk:** Instructions `FX55` and `FX65` increment the index register by default. You can prevent this behavior by setting `uint8_t conf3 = 1;` line to `uint8_t conf3 = 0;`. You can find this line at the start of the main function. (e.g. Astro Dodge game needs conf3 set to 0.)
 
 **Display Wait (Vertical Blank) Quirk:** Instruction `DXYN` must wait for vertical blank and allow one draw operation per frame. As far as I understand, with modern hardware, there shouldn't be sprite tearing even if we don't wait for vBlank since we fully fill the CHIP-8's display, create a texture from this array and then send this texture to SDL to render it on the screen. So, this instruction is implemented this way to match the emulation speed to the original hardware.
 
@@ -46,12 +46,19 @@ e.g. `$ ./chip8emu -s <ROM path>`
 
 ## Screenshots
 ### Rush Hour
-![CHIP-8 Rush Hour](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/rush_hour_1.png)
+![CHIP-8 Rush Hour](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/rush_hour1.png)
 
-![CHIP-8 Rush Hour](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/rush_hour_2.png)
+![CHIP-8 Rush Hour](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/rush_hour2.png)
 
-### Tetris
-![CHIP-8 Tetris](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/tetris.png)
+### Astro Dodge
+![CHIP-8 Astro Dodge](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/astrododge1.png)
+
+![CHIP-8 Astro Dodge](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/astrododge2.png)
+
+### Space Invaders
+![CHIP-8 Space Invaders](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/space_invaders1.png)
+
+![CHIP-8 Space Invaders](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/space_invaders2.png)
 
 
 ## Compiling

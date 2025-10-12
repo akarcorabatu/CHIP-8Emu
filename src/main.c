@@ -42,7 +42,7 @@ void audio_callback(void* userdata, Uint8* stream, int len)
 // conf1 == 0 if you want to do c.v_registers[x] = c.v_registers[y] operation before shifting.
 // conf2 == 0 if you want to jump to V0 + NNN, conf2 == 1 if you want to jump to VX + NNN
 // conf3 == 0 if you do not want to increment the index register when doing store and load operations.
-void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t conf3)
+void decodeExec(uint16_t opcode, Chip8* c, uint8_t* waitingForVBlank, uint8_t conf1, uint8_t conf2, uint8_t conf3)
 {
     uint8_t x = (opcode & 0x0F00) >> 8;
     uint8_t y = (opcode & 0x00F0) >> 4;
@@ -199,32 +199,35 @@ void decodeExec(uint16_t opcode, Chip8* c, uint8_t conf1, uint8_t conf2, uint8_t
             break;
 
         case 0xD000:
-            uint8_t xPos = c->v_registers[x] % 64;
-            uint8_t yPos = c->v_registers[y] % 32;
-            c->v_registers[0xF] = 0;
-            for (int i = 0; i < n; i++)
+            if(*waitingForVBlank)
             {
-                uint8_t spriteData = c->memory[c->index_reg + i];
-                for (int j = 0; j < 8; j++)
+                uint8_t xPos = c->v_registers[x] % 64;
+                uint8_t yPos = c->v_registers[y] % 32;
+                c->v_registers[0xF] = 0;
+                for (int i = 0; i < n; i++)
                 {
-                    uint8_t current = (spriteData & (0x80 >> j)) ? 1 : 0;
-                    if(current == 1)
+                    uint8_t spriteData = c->memory[c->index_reg + i];
+                    for (int j = 0; j < 8; j++)
                     {
-                        int xpos = (xPos + j);
-                        if(xpos >= 64){break;}
-                        int ypos = (yPos + i);
-                        if(ypos >= 32){break;}  
+                        uint8_t current = (spriteData & (0x80 >> j)) ? 1 : 0;
+                        if(current == 1)
+                        {
+                            int xpos = (xPos + j);
+                            if(xpos >= 64){break;}
+                            int ypos = (yPos + i);
+                            if(ypos >= 32){break;}  
 
-                        if(c->display[ypos][xpos] == 1) c->v_registers[0xF] = 1;
+                            if(c->display[ypos][xpos] == 1) c->v_registers[0xF] = 1;
 
-                        c->display[ypos][xpos] ^= 1;
-                        
+                            c->display[ypos][xpos] ^= 1;
+                            *waitingForVBlank = 0;
+                        }
                     }
-                    
                 }
+                c->pc += 2;
             }
-            c->pc += 2;
             break;
+
         case 0xE000:
             switch (opcode & 0x00FF)
             {
@@ -327,7 +330,7 @@ void drawDisplay(Chip8* c, SDL_Window* window, SDL_Renderer* renderer, SDL_Textu
     {
         for (int x = 0; x < 64; x++)
         {
-            pixels[y * 64 + x] = c->display[y][x] ? 0x42B0F5FF : 0x000000FF;
+            pixels[y * 64 + x] = c->display[y][x] ? 0x9BBC0FFF : 0x0F3810FF;
         }
     }
 
@@ -440,7 +443,8 @@ int main(int argc, char *argv[])
 
     uint32_t msPerDecrement = 16;
     uint32_t decrementTimer = SDL_GetTicks(); 
-
+    uint8_t waitingForVblank = 1;
+    
     while(running) 
     { 
         uint32_t start = SDL_GetTicks(); 
@@ -469,7 +473,7 @@ int main(int argc, char *argv[])
         } 
         
         uint16_t opcode = (chip8.memory[chip8.pc] << 8) | chip8.memory[chip8.pc + 1]; // Fetch instruction from memory. 
-        decodeExec(opcode, &chip8, 1, 0, 1); // Decode and execute.
+        decodeExec(opcode, &chip8, &waitingForVblank, 1, 0, 1); // Decode and execute.
 
         if (chip8.sound_timer > 0) {audio_data.sound_timer = chip8.sound_timer;} // Beep if sound timer is greater than > 0.
         else {audio_data.sound_timer = 0;} 
@@ -480,6 +484,7 @@ int main(int argc, char *argv[])
             if(chip8.sound_timer > 0) chip8.sound_timer--; 
             decrementTimer = SDL_GetTicks(); 
             drawDisplay(&chip8, window, renderer, texture);
+            waitingForVblank = 1;
         } 
         
         uint32_t elapsed = SDL_GetTicks() - start; 

@@ -342,19 +342,29 @@ void drawDisplay(Chip8* c, SDL_Window* window, SDL_Renderer* renderer, SDL_Textu
 
 int main(int argc, char *argv[])
 {
+    uint8_t conf1 = 0;
+    uint8_t conf2 = 0;
+    uint8_t conf3 = 1;
+    char* romName = argv[1];
     // Arguments to run the emulator with a selected file.
     if(argc != 2)
     {
-        if(argc > 2)
+        if(argc == 3)
         {
-            printf("Please only enter ROM name.\n");
+            if(strcmp(argv[1],"-s") == 0) {conf1 = 1; strcpy(romName, argv[2]);}
+            else {printf("Invalid parameters.\nExample:\n./main test.ch8\n./main -s test.ch8\n"); return 0;}
+        }
+
+        else if(argc > 3)
+        {
+            printf("Invalid parameters.\nExample:\n./main test.ch8\n./main -s test.ch8\n");
             return 0;
         }
 
-        else {printf("Please enter ROM name. (Example: ./main test.ch8)\n"); return 0;}
+        else {printf("Please enter a ROM name. Example:\n./main test.ch8\n./main -s test.ch8\n"); return 0;}
     }
 
-    char* romName = argv[1];
+    
 
     srand(time(NULL));
 
@@ -473,7 +483,7 @@ int main(int argc, char *argv[])
         } 
         
         uint16_t opcode = (chip8.memory[chip8.pc] << 8) | chip8.memory[chip8.pc + 1]; // Fetch instruction from memory. 
-        decodeExec(opcode, &chip8, &waitingForVblank, 1, 0, 1); // Decode and execute.
+        decodeExec(opcode, &chip8, &waitingForVblank, conf1, conf2, conf3); // Decode and execute.
 
         if (chip8.sound_timer > 0) {audio_data.sound_timer = chip8.sound_timer;} // Beep if sound timer is greater than > 0.
         else {audio_data.sound_timer = 0;} 

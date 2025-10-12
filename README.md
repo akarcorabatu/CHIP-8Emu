@@ -3,8 +3,10 @@ A CHIP-8 Emulator Written in C
 
 I have written this CHIP-8 emulator to see how a processor's specifications are translated into actual code. This is my first time writing an emulator.
 
+
 ## CHIP-8
 CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker on his 1802 microprocessor. It was initially used on the COSMAC VIP and Telmac 1800, which were 8-bit microcomputers made in the mid-1970s. It is a bytecode language, allowing games to be written once and run on any machine with a CHIP-8 interpreter. This made it possible for programmers to write games without needing to know assembly language of a specific chip.
+
 
 ## Technical Overview
 ### Specifications
@@ -25,16 +27,21 @@ Delay and sound timers are decremented by one every ≈16ms if their values are 
 
 Sound timer makes the emulator make a beep sound using SDL2 if its value is greater than 0.
 
-The display is updated every ≈16ms. The emulator uses SDL2 to render the display buffer to the screen.
+The display is updated every ≈16ms. The emulator uses SDL2 to render the display to the screen.
 
 ### Quirks
-**Shift Quirk:** Instructions `8XY6` and `8XYE` ignore `vY register` and shift `vX register` by default. You can use `-s` parameter to run games that needs this quirk (e.g. Space Invaders needs this quirk turned on). This makes the emulator load `vY register` to `vX register` before shifting `vX register`.  
-e.g. `$ ./chip8emu -s <ROM path>`  
-
 **VF Reset Quirk:** Instructions `8XY1`, `8XY2` and `8XY3` set  `vF register` to 0 after performing their logical operations.
 
 **Load Store (Memory) Quirk:** Instructions `FX55` and `FX65` increment the index register by default. You can prevent this behavior by setting `uint8_t conf3 = 1;` line to `uint8_t conf3 = 0;`. You can find this line at the start of the main function.
 
+**Display Wait (Vertical Blank) Quirk:** Instruction `DXYN` must wait for vertical blank and allow one draw operation per frame. As far as I understand, with modern hardware, there shouldn't be sprite tearing even if we don't wait for vBlank since we fully fill the CHIP-8's display, create a texture from this array and then send this texture to SDL to render it on the screen. So, this instruction is implemented this way to match the emulation speed to the original hardware.
+
+**Clipping Quirk:** Instruction `DXYN` clips the sprite instead of wrapping around. You can change this behavior easily by modifying this instruction's implementation in the code.
+
+**Jumping Quirk:** Instruction `BNNN` jumps to the address "value of `v0 register` + NNN" by default. You can change this behavior to make this instruction jump to "value of `vX register` + NNN" by setting `uint8_t conf2 = 0;` line to `uint8_t conf2 = 1;`. You can find this line at the start of the main function.
+
+**Shift Quirk:** Instructions `8XY6` and `8XYE` ignore `vY register` and shift `vX register` by default. However, some games require loading `vY register` to `vX register` before making shifting a operation on `vX register`. You can use `-s` parameter to run games that needs this behavior. (e.g. Space Invaders needs this modification to run properly.)
+e.g. `$ ./chip8emu -s <ROM path>` 
 
 
 ## Screenshots
@@ -46,7 +53,10 @@ e.g. `$ ./chip8emu -s <ROM path>`
 ### Tetris
 ![CHIP-8 Tetris](https://raw.githubusercontent.com/akarcorabatu/CHIP-8Emu/refs/heads/main/screenshots/tetris.png)
 
+
 ## Compiling
+You need **SDL2** to compile the code.
+
 ### Linux
 ```
 $ sudo apt install build-essential cmake libsdl2-dev
@@ -56,10 +66,17 @@ $ cmake ..
 $ make
 ```
 
+
 ## Running
 ### Linux
+**Default**
 ```
 $ ./chip8emu <ROM path>
+```
+
+**With Other Shifting Configuration**
+```
+$ ./chip8emu -s <ROM path>
 ```
 
 ## Keyboard Controls
